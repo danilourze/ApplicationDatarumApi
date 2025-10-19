@@ -17,7 +17,6 @@ public class BcbSgsService : IEconomicIndicatorService
     {
         _http = http;
 
-        // Headers para evitar 406
         if (!_http.DefaultRequestHeaders.Accept.Any())
             _http.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
@@ -27,7 +26,6 @@ public class BcbSgsService : IEconomicIndicatorService
 
     public async Task<decimal?> GetSelicDailyAsync(DateTime? date = null, CancellationToken ct = default)
     {
-        // Se vier data, busca intervalo fechado; senão, busca geral e pega o último
         string uri = date.HasValue
             ? $"{BaseUrl}dados/serie/bcdata.sgs.432/dados?formato=json&dataInicial={date:dd/MM/yyyy}&dataFinal={date:dd/MM/yyyy}"
             : $"{BaseUrl}dados/serie/bcdata.sgs.432/dados?formato=json";
@@ -35,7 +33,6 @@ public class BcbSgsService : IEconomicIndicatorService
         var arr = await GetArrayWithFallbackAsync(uri, ct);
         if (arr.Count == 0) return null;
 
-        // Se foi intervalo fechado, vem 0 ou 1 item. Senão, pega o último.
         var item = date.HasValue ? arr.LastOrDefault() : arr.Last();
         return item?.TryGetValor();
     }
@@ -52,15 +49,13 @@ public class BcbSgsService : IEconomicIndicatorService
             .ToList();
     }
 
-    // --- helpers ---
     private async Task<List<SgsItem>> GetArrayWithFallbackAsync(string uri, CancellationToken ct)
     {
         using var resp = await _http.GetAsync(uri, ct);
 
-        // Alguns ambientes retornam 406 com esse path; tenta rota alternativa
         if ((int)resp.StatusCode == 406)
         {
-            var alt = ToAltRoute(uri); // troca /dados/serie/bcdata.sgs.432/dados -> /sgs/series/432/dados
+            var alt = ToAltRoute(uri); 
             using var respAlt = await _http.GetAsync(alt, ct);
             respAlt.EnsureSuccessStatusCode();
             var jsonAlt = await respAlt.Content.ReadAsStringAsync(ct);
@@ -74,7 +69,6 @@ public class BcbSgsService : IEconomicIndicatorService
 
     private static string ToAltRoute(string original)
     {
-        // Converte o caminho conhecido para a rota alternativa do SGS
         // de: https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?... 
         // para: https://api.bcb.gov.br/sgs/series/432/dados?...
         var idxSerie = original.IndexOf("bcdata.sgs.", StringComparison.OrdinalIgnoreCase);
@@ -82,12 +76,12 @@ public class BcbSgsService : IEconomicIndicatorService
         {
             var start = idxSerie + "bcdata.sgs.".Length;
             var dot = original.IndexOf('.', start);
-            var seriesId = original.Substring(start, dot - start); // "432"
+            var seriesId = original.Substring(start, dot - start); 
             var queryIdx = original.IndexOf('?', dot);
             var query = queryIdx >= 0 ? original.Substring(queryIdx) : string.Empty;
             return $"{BaseUrl}sgs/series/{seriesId}/dados{query}";
         }
-        return original; // fallback
+        return original;
     }
 
     private record SgsItem(string data, string valor)
