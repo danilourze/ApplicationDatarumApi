@@ -5,10 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDb>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IPortfolioService, PortfolioService>();
+builder.Services.AddSingleton<IPortfolioService, PortfolioService>();
+
+builder.Services.AddHttpClient<IEconomicIndicatorService, BcbSgsService>();
+
+
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

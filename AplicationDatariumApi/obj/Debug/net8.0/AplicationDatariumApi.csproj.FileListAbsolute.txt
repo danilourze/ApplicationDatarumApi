@@ -53,3 +53,4 @@ C:\repo\FIAP\AplicationDatariumApi\AplicationDatariumApi\obj\Debug\net8.0\refint
 C:\repo\FIAP\AplicationDatariumApi\AplicationDatariumApi\obj\Debug\net8.0\AplicationDatariumApi.pdb
 C:\repo\FIAP\AplicationDatariumApi\AplicationDatariumApi\obj\Debug\net8.0\AplicationDatariumApi.genruntimeconfig.cache
 C:\repo\FIAP\AplicationDatariumApi\AplicationDatariumApi\obj\Debug\net8.0\ref\AplicationDatariumApi.dll
+C:\repo\FIAP\AplicationDatariumApi\AplicationDatariumApi\obj\Debug\net8.0\AplicationDatariumApi.sourcelink.json

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AplicationDatariumApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4b1575d47e76e77892863aaa04ad99d350b8d267")]
 [assembly: System.Reflection.AssemblyProductAttribute("AplicationDatariumApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AplicationDatariumApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
