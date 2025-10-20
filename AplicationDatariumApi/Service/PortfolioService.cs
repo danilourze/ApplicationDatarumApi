@@ -1,87 +1,120 @@
-using System.Collections.Concurrent;
-using System.Text;
-using System.Text.Json;
 using AplicationDatariumApi.Domain;
 using AplicationDatariumApi.Domain.Interface;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Text.Json;
 
-namespace AplicationDatariumApi.Service;
-
-public class PortfolioService : IPortfolioService
+namespace AplicationDatariumApi.Service
 {
-    private readonly ConcurrentDictionary<long, Portifolio> _store = new();
-    private long _seq = 0;
-
-    private static readonly JsonSerializerOptions _jsonOptions = new()
+    public class PortfolioService : IPortfolioService
     {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
+        private readonly ApplicationDbContext _context;
 
-    public PortfolioService() { }
+        // JsonOptions para exportação
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        };
 
-    public Task<List<Portifolio>> GetAllAsync()
-    {
-        var list = _store.Values.OrderBy(p => p.Id).ToList();
-        return Task.FromResult(list);
-    }
+        public PortfolioService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-    public Task<Portifolio?> GetByIdAsync(long id)
-    {
-        _store.TryGetValue(id, out var p);
-        return Task.FromResult(p);
-    }
+        // Obter todos os portfólios
+        public async Task<List<Portifolio>> GetAllAsync()
+        {
+            return await _context.Portifolios
+                                 .Include(p => p.Assets)  // Incluindo os assets associados
+                                 .OrderBy(p => p.Id)
+                                 .ToListAsync();
+        }
 
-    public Task<Portifolio> CreateAsync(Portifolio input)
-    {
-        var id = Interlocked.Increment(ref _seq);
-        var clone = DeepClone(input);
-        clone.Id = id;
-        _store[id] = clone;
-        return Task.FromResult(clone);
-    }
+        // Obter portfólio por ID
+        public async Task<Portifolio?> GetByIdAsync(long id)
+        {
+            return await _context.Portifolios
+                                 .Include(p => p.Assets)  // Incluindo os assets associados
+                                 .FirstOrDefaultAsync(p => p.Id == id);
+        }
 
-    public Task UpdateAsync(Portifolio input)
-    {
-        if (!_store.ContainsKey(input.Id))
-            throw new KeyNotFoundException($"Portfolio {input.Id} não encontrado.");
+        // Criar um novo portfólio
+        public async Task<Portifolio> CreateAsync(Portifolio input)
+        {
+            // Adiciona o novo portfólio ao contexto
+            _context.Portifolios.Add(input);
+            await _context.SaveChangesAsync();
+            return input;
+        }
 
-        var clone = DeepClone(input);
-        _store[input.Id] = clone;
-        return Task.CompletedTask;
-    }
+        // Atualizar um portfólio existente
+        public async Task UpdateAsync(Portifolio input)
+        {
+            var existingPortfolio = await _context.Portifolios
+                                                  .Include(p => p.Assets)  // Incluindo os assets associados
+                                                  .FirstOrDefaultAsync(p => p.Id == input.Id);
 
-    public Task DeleteAsync(long id)
-    {
-        _store.TryRemove(id, out _);
-        return Task.CompletedTask;
-    }
+            if (existingPortfolio == null)
+            {
+                throw new KeyNotFoundException($"Portfolio {input.Id} não encontrado.");
+            }
 
-    public Task<(byte[] content, string contentType, string fileName)> ExportAsync(long id)
-    {
-        if (!_store.TryGetValue(id, out var entity))
-            throw new KeyNotFoundException($"Portfolio {id} não encontrado.");
+            // Atualize os campos conforme necessário
+            existingPortfolio.Name = input.Name;
+            existingPortfolio.RiskProfile = input.RiskProfile;
+            existingPortfolio.TotalAmount = input.TotalAmount;
+            existingPortfolio.Assets = input.Assets;  // Atualiza a lista de assets
 
-        var json = JsonSerializer.Serialize(entity, _jsonOptions);
-        var bytes = Encoding.UTF8.GetBytes(json);
-        var fileName = $"portfolio-{id}.json";
-        return Task.FromResult<(byte[], string, string)>((bytes, "application/json", fileName));
-    }
+            await _context.SaveChangesAsync();
+        }
 
-    public async Task<Portifolio> ImportAsync(Stream jsonStream)
-    {
-        using var reader = new StreamReader(jsonStream, Encoding.UTF8);
-        var json = await reader.ReadToEndAsync();
+        // Deletar um portfólio pelo ID
+        public async Task DeleteAsync(long id)
+        {
+            var portfolio = await _context.Portifolios
+                                          .FirstOrDefaultAsync(p => p.Id == id);
 
-        var portfolio = JsonSerializer.Deserialize<Portifolio>(json, _jsonOptions)
-                        ?? throw new InvalidOperationException("JSON de portfolio inválido.");
+            if (portfolio == null)
+            {
+                throw new KeyNotFoundException($"Portfolio {id} não encontrado.");
+            }
 
-        portfolio.Id = 0; // sempre cria novo registro
-        return await CreateAsync(portfolio);
-    }
+            _context.Portifolios.Remove(portfolio);
+            await _context.SaveChangesAsync();
+        }
 
-    private static Portifolio DeepClone(Portifolio p)
-    {
-        var json = JsonSerializer.Serialize(p);
-        return JsonSerializer.Deserialize<Portifolio>(json)!;
+        // Exportar um portfólio como JSON
+        public async Task<(byte[] content, string contentType, string fileName)> ExportAsync(long id)
+        {
+            var entity = await _context.Portifolios
+                                       .Include(p => p.Assets)  // Incluindo os assets associados
+                                       .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (entity == null)
+                throw new KeyNotFoundException($"Portfolio {id} não encontrado.");
+
+            var json = JsonSerializer.Serialize(entity, _jsonOptions);
+            var bytes = Encoding.UTF8.GetBytes(json);
+            var fileName = $"portfolio-{id}.json";
+
+            return (bytes, "application/json", fileName);
+        }
+
+        // Importar um portfólio a partir de um JSON
+        public async Task<Portifolio> ImportAsync(Stream jsonStream)
+        {
+            using var reader = new StreamReader(jsonStream, Encoding.UTF8);
+            var json = await reader.ReadToEndAsync();
+
+            var portfolio = JsonSerializer.Deserialize<Portifolio>(json, _jsonOptions)
+                            ?? throw new InvalidOperationException("JSON de portfolio inválido.");
+
+            // Criação de um novo portfólio
+            _context.Portifolios.Add(portfolio);
+            await _context.SaveChangesAsync();
+
+            return portfolio;
+        }
     }
 }

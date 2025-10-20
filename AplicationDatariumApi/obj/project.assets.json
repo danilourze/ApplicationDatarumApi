@@ -1440,23 +1440,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\laura\\.nuget\\packages\\": {},
+    "C:\\Users\\labsfiap\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\repo\\FIAP\\AplicationDatariumApi\\AplicationDatariumApi\\AplicationDatariumApi.csproj",
+      "projectUniqueName": "C:\\Users\\labsfiap\\source\\repos\\danilourze\\ApplicationDatarumApi\\AplicationDatariumApi\\AplicationDatariumApi.csproj",
       "projectName": "AplicationDatariumApi",
-      "projectPath": "C:\\repo\\FIAP\\AplicationDatariumApi\\AplicationDatariumApi\\AplicationDatariumApi.csproj",
-      "packagesPath": "C:\\Users\\laura\\.nuget\\packages\\",
-      "outputPath": "C:\\repo\\FIAP\\AplicationDatariumApi\\AplicationDatariumApi\\obj\\",
+      "projectPath": "C:\\Users\\labsfiap\\source\\repos\\danilourze\\ApplicationDatarumApi\\AplicationDatariumApi\\AplicationDatariumApi.csproj",
+      "packagesPath": "C:\\Users\\labsfiap\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\labsfiap\\source\\repos\\danilourze\\ApplicationDatarumApi\\AplicationDatariumApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\laura\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\labsfiap\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -1465,6 +1465,7 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -1482,7 +1483,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -1528,7 +1530,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.413/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
