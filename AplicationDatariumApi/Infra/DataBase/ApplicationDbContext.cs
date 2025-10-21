@@ -14,11 +14,9 @@ namespace AplicationDatariumApi.Domain
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configuração do enum RiskProfile (usando int para armazenar o valor do enum no banco)
             modelBuilder.Entity<Portifolio>()
                 .Property(p => p.RiskProfile)
                 .HasConversion<int>();
-
         }
     }
 }
